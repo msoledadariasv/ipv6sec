@@ -1,0 +1,77 @@
+name: icmpv6sec
+
+  
+topology:
+  nodes:
+    # Nokia SRL Linux Layer 2 Device
+    srlswitch:
+      kind: nokia_srlinux
+      image: ghcr.io/nokia/srlinux:24.10.1
+      type: ixrd3
+      startup-config: switch/config.json
+      
+
+      
+    # Nokia SRL Linux Router
+    srlrouter:
+      kind: nokia_srlinux
+      image: ghcr.io/nokia/srlinux:24.10.1
+      type: ixrd3
+      startup-config: router/config.json
+      exec:
+        - "sysctl -w net.ipv6.conf.e1-1.accept_ra=0"
+      
+    #srvweb:
+      #kind: linux
+      #image: docker.io/esanchezv/srvhttps:latest
+      #binds:
+       #- configs/serverweb.sh:/root/serverweb.sh
+       #- configs/web-server.html:/var/www/localhost/htdocs/index.html
+       #- configs/webinar-ipv6-lacnic-parte1y2.zip:/var/www/localhost/htdocs/webinar-ipv6-lacnic-parte1y2.zip
+      #exec:
+       #- nginx
+       #- ip -6 route del default dev eth0
+       #- ip -6 addr add 2001:db8:d1::50/64 dev eth1
+       #- ip -6 route add 2001:db8:10::/64 via 2001:db8:d1::1
+
+    
+    PC1:
+      kind: linux
+      image: docker.io/esanchezv/kaliipv6v2.1:latest
+      exec:
+      - ip -6 route del default dev eth0
+      
+        
+    PC2:
+      kind: linux
+      image: docker.io/esanchezv/kaliipv6v2.1:latest
+      exec:
+      - ip -6 route del default dev eth0  
+
+    PC3:
+      kind: linux
+      image: docker.io/esanchezv/kaliipv6v2.1:latest
+      exec:
+      - ip -6 route del default dev eth0
+      
+    PC4:
+      kind: linux
+      image: docker.io/esanchezv/kaliipv6v2.1:latest
+      exec:
+      - ip -6 route del default dev eth0
+      
+        
+    
+  links:
+    - endpoints: ["srlrouter:e1-1", "srlswitch:e1-1"]
+    #- endpoints: ["srlrouter:e1-2", "srvweb:eth1"]
+    - endpoints: ["PC1:eth1", "srlswitch:e1-2"]
+      mtu: 1500
+    - endpoints: ["PC2:eth1", "srlswitch:e1-3"]
+      mtu: 1500
+    - endpoints: ["PC3:eth1", "srlswitch:e1-4"]
+      mtu: 1500
+    - endpoints: ["PC4:eth1", "srlswitch:e1-5"]
+      mtu: 1500  
+    
+     
